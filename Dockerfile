@@ -9,9 +9,12 @@ RUN apt-get install -y qemu libncurses5-dev gcc-arm-linux-gnueabi build-essentia
 
 ENV SCRDIR=/opt/scripts
 ENV PACDIR=/opt/packages
+ENV CODDIR=/opt/codes
 
 COPY ./scripts/  $SCRDIR
 COPY ./packages  $PACDIR
+COPY ./codes     $CODDIR
+
 RUN chmod +x $SCRDIR/*
 RUN $SCRDIR/deploymentinit.sh
 

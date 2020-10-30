@@ -59,10 +59,10 @@ tar xf ${COMPILERBALL} -C $DEVDIR
 
 # Config arm linux compiler
 COMPILERBIN=$DEVDIR/${COMPILER}/bin
-NEWPATH=`echo $PATH | sed  "s|COMPILERPATH|$COMPILERBIN|g"`
+NEWPATH=`echo $PATH | sed  "s|###COMPILERPATH###|$COMPILERBIN|g"`
 
 # Replace COMPILERPATH by the path of compiler
-sed -i "s|COMPILERPATH|$COMPILERBIN|g" $SCRDIR/setupvars.sh
+sed -i "s|###COMPILERPATH###|$COMPILERBIN|g" $SCRDIR/setupvars.sh
 export PATH=${NEWPATH}
 
 # Compile busybox
@@ -112,4 +112,12 @@ make bzImage -j8
 make dtbs
 
 # Create a sympol link for kernel source
-ln -s $KERNELSRC /root/linux
+LINUXPATH=/root/linux
+ln -s $KERNELSRC $LINUXPATH
+sed -i "s|###KERNELPATH###|$LINUXPATH|g" $SCRDIR/setupvars.sh
+
+# Create a sympol link to codes source
+LINUXCODES=$CODDIR
+CODEPATH=/root/codes
+ln -s $LINUXCODES $CODEPATH
+sed -i "s|###CODESPATH###|$CODEPATH|g" $SCRDIR/setupvars.sh
