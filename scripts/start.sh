@@ -31,5 +31,6 @@
 
 MYUSER=root
 echo "source /opt/scripts/setupvars.sh" >> /root/.bashrc
+cp /opt/scripts/.vimrc /root/
 su - ${MYUSER}
 
