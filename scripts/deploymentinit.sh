@@ -3,20 +3,23 @@
 # active environment
 source $SCRDIR/setupvars.sh
 
-KERNELVER=linux-4.0.1
+KERNELGIT="TRUE"   # TRUE or FALSE
+KERNELVER=linux-4.12.1
 BUSYBOXVER=busybox-1.32.0
 COMPILER=gcc-linaro-5.5.0-2017.10-x86_64_arm-linux-gnueabihf
 
-KERNELBALL=$PACDIR/linux-4.0.1.tar.gz
+KERNELBALL=$PACDIR/linux-4.12.1.tar.gz
 BUSYBOXBALL=$PACDIR/busybox-1.32.0.tar.bz2
 COMPILERBALL=$PACDIR/gcc-linaro-5.5.0-2017.10-x86_64_arm-linux-gnueabihf.tar.xz
 
+KERNELGBRN=develop # branch
+KERNELGURL=https://gitee.com/clayding/${KERNELVER}.git # git repository path
 KERNELURL=https://mirrors.edge.kernel.org/pub/linux/kernel/v4.x/${KERNELVER}.tar.gz
 BUSYBOXURL=https://busybox.net/downloads/${BUSYBOXVER}.tar.bz2
 COMPILERURL=https://releases.linaro.org/components/toolchain/binaries/latest-5/arm-linux-gnueabihf/$COMPILER.tar.xz
 
 CONFIGDIR=$PACDIR/config/
-KERNELCONF=$CONFIGDIR/kernel_config
+KERNELCONF=$CONFIGDIR/${KERNELVER}_config
 BUSYBOXCONF=$CONFIGDIR/busybox_config
 
 DEVDIR=/opt/devspace
@@ -25,19 +28,22 @@ BUSYBOXSRC=$DEVDIR/$BUSYBOXVER/
 
 # Download linux kernel and busybox from internet
 if [ ! -f $KERNELBALL ];then
-    echo "Download linux kernel from $KERNELURL"
-    wget -c $KERNELURL -P $PACDIR
+    # do not download from GIT
+    if [ $KERNELGIT != "TRUE" ];then
+        echo "Download linux kernel from $KERNELURL"
+        wget -c $KERNELURL -P $PACDIR
+    fi
 fi
 
 if [ ! -f $BUSYBOXBALL ];then
-    echo "Download busybox from $BUSYBOXURL"
-    wget -c $BUSYBOXURL -P $PACDIR
+    echo "Downloading busybox from $BUSYBOXURL"
+    wget -c $BUSYBOXURL -P $PACDIR 1> /dev/null
 fi
 
 echo ${COMPILERBALL}
 if [ ! -f ${COMPILERBALL} ];then
-    echo "Download arm compiler from $COMPILERURL"
-    wget -c $COMPILERURL -P $PACDIR
+    echo "Downloading arm compiler from $COMPILERURL"
+    wget -c $COMPILERURL -P $PACDIR 1> /dev/null
 fi
 
 if [ ! -d $DEVDIR ];then
@@ -48,8 +54,18 @@ else
 fi
 
 # Uncompress tarballs
-echo "Untar $KERNELBALL $DEVDIR"
-tar xzf $KERNELBALL -C $DEVDIR
+if [ -f $KERNELBALL ];then
+    echo "Untar $KERNELBALL to $DEVDIR"
+    tar xzf $KERNELBALL -C $DEVDIR
+else
+    if [ $KERNELGIT == "TRUE" ];then
+        echo "Cloning linux kernel from $KERNELGURL to $DEVDIR"
+        git clone -b $KERNELGBRN $KERNELGURL $KERNELSRC 1> /dev/null
+    else
+        echo "Linux source not exits, exit..."
+	exit 1
+    fi
+fi
 
 echo "Untar $BUSYBOXBALL to $DEVDIR"
 tar xjf $BUSYBOXBALL -C $DEVDIR
@@ -104,7 +120,7 @@ sudo mknod null  c 1 3
 
 # Compile linux kernel
 cp -r $BUSYBOXSRC/_install/ $KERNELSRC
-cd $KERNELSRC && make vexpress_defconfig
+cd $KERNELSRC && make defconfig
 echo "Copy kernel configuration file from $KERNELCONF to $KERNELSRC"
 cp $KERNELCONF $KERNELSRC/.config
 
