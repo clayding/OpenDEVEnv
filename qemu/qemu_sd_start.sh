@@ -11,4 +11,11 @@ qemu-system-arm \
     -append "root=/dev/mmcblk0 rw rdinit=/linuxrc console=ttyAMA0 loglevel=8" \
     -dtb /root/linux/arch/arm/boot/dts/vexpress-v2p-ca9.dtb \
     -sd /root/workspace/kernelvolumes/rootfs.ext3 \
+    --fsdev local,id=kmod_dev,path=/opt/shared,security_model=none \
+    -device virtio-9p-device,fsdev=kmod_dev,mount_tag=share_mount\
+    -netdev user,id=mynet\
+    -device virtio-net-device,netdev=mynet\
     -nographic
+
+# Mount share dir in emulated env:
+# mkdir -p /mnt/host_share && mount -t 9p -o trans=virtio share_mount /mnt/host_share -oversion=9p2000.L
