@@ -12,11 +12,13 @@ RUN apt-get install -y qemu libncurses5-dev build-essential
 ENV SCRDIR=/opt/scripts
 ENV PACDIR=/opt/packages
 ENV CODDIR=/opt/codes
+ENV SHADIR=/opt/shared
 
 COPY ./scripts/  $SCRDIR
 COPY ./packages  $PACDIR
 COPY ./codes     $CODDIR
 
+RUN mkdir -p $SHADIR
 RUN chmod +x $SCRDIR/*
 RUN $SCRDIR/deploymentinit.sh
 
