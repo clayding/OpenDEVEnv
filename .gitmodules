@@ -5,5 +5,5 @@
 	path = 3rdparty/Linux-Device-Driver-Development-Cookbook
 	url = https://github.com/PacktPublishing/Linux-Device-Driver-Development-Cookbook.git
 [submodule "dtc"]
-	path = dtc
+	path = 3rdparty/dtc
 	url = https://git.kernel.org/pub/scm/utils/dtc/dtc.git
