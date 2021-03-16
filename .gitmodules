@@ -7,3 +7,7 @@
 [submodule "3rdparty/dtc"]
 	path = 3rdparty/dtc
 	url = https://git.kernel.org/pub/scm/utils/dtc/dtc.git
+[submodule "3rdparty/clayding_linux-4.12.1"]
+	path = 3rdparty/clayding_linux-4.12.1
+    url = https://gitee.com/clayding/linux-4.12.1
+    branch = develop
