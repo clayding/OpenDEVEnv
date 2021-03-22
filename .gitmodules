@@ -11,3 +11,6 @@
 	path = 3rdparty/clayding_linux-4.12.1
     url = https://gitee.com/clayding/linux-4.12.1
     branch = develop
+[submodule "3rdparty/Linux-Device-Drivers-Development"]
+	path = 3rdparty/Linux-Device-Drivers-Development
+	url = https://github.com/PacktPublishing/Linux-Device-Drivers-Development.git
