@@ -1,7 +1,7 @@
 # Install tools
-ARG PACKAGES=/root/workspace/tools/
+ARG PACKAGES=/root/workspace/devtools/
 WORKDIR $PACKAGES
-COPY packages/devtools ./
+COPY packages/ ./
 
 ARG TARDIR=$WORKDIR/gdb
 RUN mkdir -p $TARDIR

@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install -y  git vim cmake sudo libsdl2-dev nasm ya
     net-tools inetutils-ping wget
 RUN apt-get install -y qemu libncurses5-dev build-essential
 
+{{ DOCKFILE_DEVTOOL }}
+
 FROM docker4dev_base as docker4kernel
 
 ENV SCRDIR=/opt/scripts
