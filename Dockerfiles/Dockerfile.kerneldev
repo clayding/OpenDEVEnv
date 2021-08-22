@@ -1,17 +1,11 @@
-FROM ubuntu:18.04 as docker4dev_base
-MAINTAINER clayding<gdskclay@gmail.com>
+FROM {{ DOCKERFILE_OS_VERSION }} as docker4dev_base
+MAINTAINER {{ DOCKERFILE_MAINTAINER }}
 
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get clean && apt-get update && apt-get upgrade -y --fix-missing
-RUN apt-get update && apt-get install -y  git vim cmake sudo libsdl2-dev nasm yasm \
-    libboost-all-dev libgflags-dev libgoogle-glog-dev protobuf-compiler libhdf5-dev \
-    lsb-core ethtool quilt autoconf linux-headers-4.15.0-46-generic tk flex pciutils \
-    libnl-route-3-200 graphviz tcl chrpath kmod automake swig lsof dpatch bison \
-    net-tools inetutils-ping wget
-RUN apt-get install -y qemu libncurses5-dev build-essential
+RUN {{ DOCKERFILE_DEPENDENCIES }}
 
-{{ DOCKFILE_DEVTOOL }}
+{{ DOCKERFILE_DEVTOOL }}
 
 FROM docker4dev_base as docker4kernel
 
@@ -20,9 +14,10 @@ ENV PACDIR=/opt/packages
 ENV CODDIR=/opt/codes
 ENV SHADIR=/opt/shared
 
-COPY ./scripts/  $SCRDIR
-COPY ./packages  $PACDIR
-COPY ./codes     $CODDIR
+ARG SUBDIR=kerneldev/
+COPY ./scripts/$SUBDIR  $SCRDIR
+COPY ./packages/$SUBDIR $PACDIR
+COPY ./codes/$SUBDIR    $CODDIR
 
 RUN mkdir -p $SHADIR
 RUN chmod +x $SCRDIR/*

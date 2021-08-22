@@ -1,0 +1,28 @@
+
+ubuntu: 
+    version: 18.04
+    dependency: apt-get clean && \
+        apt-get update && apt-get upgrade -y --fix-missing && \
+        \ &&
+        apt-get update && apt-get install -y git vim cmake sudo libsdl2-dev nasm yasm \
+        libboost-all-dev libgflags-dev libgoogle-glog-dev protobuf-compiler libhdf5-dev \
+        lsb-core ethtool quilt autoconf linux-headers-4.15.0-46-generic tk flex pciutils \
+        libnl-route-3-200 graphviz tcl chrpath kmod automake swig lsof dpatch bison \
+        net-tools inetutils-ping wget && \
+        \
+        apt-get install -y qemu libncurses5-dev build-essential
+centos: 
+    version: 7
+    dependency: yum clean all && yum makecache && yum -y update && yum -y update \
+        && yum install -y python3-pip make gcc gcc-c++ \
+        glib2 gtk2 git curl wget iproute2 iproute2-doc net-tools \
+        sudo pciutils bzip2 vim zsh \
+        \ &&
+        yum install -y sudo iproute2 iproute2-doc net-tools file \
+        \ &&
+        yum install -y texinfo automake ncurses-devel flex readline-devel \
+        libudev-devel kernel-devel automake libtool \
+        \ &&
+        yum install -y mercurial pcre-devel zlib-devel \
+        \ &&
+        yum -y install gperf libtool-ltdl-devel texinfo bison
