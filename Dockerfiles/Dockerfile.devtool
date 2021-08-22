@@ -1,0 +1,106 @@
+# Install tools
+ARG PACKAGES=/root/workspace/tools/
+WORKDIR $PACKAGES
+COPY packages/devtools ./
+
+ARG TARDIR=$WORKDIR/gdb
+RUN mkdir -p $TARDIR
+RUN tar -xvzf gdb-10.2.tar.gz -C $TARDIR --strip-components 1 && cd $TARDIR/ && \
+    ./configure --prefix=/usr/local && make -j${nproc} && make install
+
+ARG TARDIR=$WORKDIR/cgdb
+RUN mkdir -p $TARDIR
+#RUN git clone https://github.com/cgdb/cgdb.git && 
+RUN tar -xvzf cgdb-0.7.1.tar.gz -C $TARDIR --strip-components 1 && cd $TARDIR/ \
+    && ./autogen.sh && ./configure --prefix=/usr/local && make -j${nproc} && \
+    make install
+
+ARG TARDIR=$WORKDIR/htop
+RUN mkdir -p $TARDIR
+#RUN git clone https://github.com/htop-dev/htop.git &&
+RUN tar -xvzf htop-3.0.5.tar.gz -C $TARDIR --strip-components 1 && cd $TARDIR/ \
+    && ./autogen.sh && ./configure --prefix=/usr/local && make -j${nproc} && \
+    make install
+
+RUN yum -y install gperf libtool-ltdl-devel texinfo bison
+ARG TARDIR=$WORKDIR/global
+RUN mkdir -p $TARDIR
+# wget -c https://ftp.gnu.org/pub/gnu/global/global-6.6.tar.gz
+RUN tar -xvzf global-6.6.tar.gz -C $TARDIR --strip-components 1 && cd $TARDIR/ \
+    && /bin/bash reconf.sh && ./configure --prefix=/usr/local && \
+    make -j${nproc} && make install
+# To configure GNU global in VScode, add below lines to setting.json
+# {
+#     "gnuGlobal.globalExecutable": "/usr/local/bin/global",
+#     "gnuGlobal.gtagsExecutable": "/usr/local/bin/gtags"
+# }
+
+## echo n for auto continue without tips
+#RUN echo -e "n" | \
+#    zsh -c "$(wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
+
+# vimplus
+RUN git clone https://github.com/chxuan/vimplus.git ~/.vimplus && cd ~/.vimplus \
+    && ./install.sh
+
+## CMake
+ARG TARDIR=/usr/local/cmake-3.20.2-linux-x86_64
+ENV CMAKE_INSTALL=$TARDIR
+RUN mkdir -p $TARDIR
+RUN tar -xvzf cmake-3.20.2-linux-x86_64.tar.gz -C $TARDIR --strip-components 1
+
+## GCC 8.2 or higer upgrade
+### gmp install
+ARG TARDIR=$WORKDIR/gmp
+RUN mkdir -p $TARDIR
+RUN tar -jvxf gmp-6.1.0.tar.bz2 -C $TARDIR --strip-components 1 && cd $TARDIR/ \
+    && ./configure --prefix=/usr/local && make -j${nproc} && make install
+
+### mpfr install
+ARG TARDIR=$WORKDIR/mpfr
+RUN mkdir -p $TARDIR
+RUN tar -jvxf mpfr-3.1.4.tar.bz2 -C $TARDIR --strip-components 1 && cd $TARDIR/ \
+    && ./configure --prefix=/usr/local && make -j${nproc} && make install
+
+### mpc install
+ARG TARDIR=$WORKDIR/mpc
+RUN mkdir -p $TARDIR
+RUN tar -zvxf mpc-1.0.3.tar.gz -C $TARDIR --strip-components 1 && cd $TARDIR/ \
+    && ./configure --prefix=/usr/local && make -j${nproc} && make install
+
+### gcc install
+# ARG TARDIR=$WORKDIR/gcc
+# ENV GCC_INSTALL=/usr/local/gcc-8.5.0
+# RUN mkdir -p $TARDIR
+# RUN tar -zvxf gcc-8.5.0.tar.gz -C $TARDIR --strip-components 1 && cd $TARDIR/ \
+#     && ./configure --prefix=$GCC_INSTALL --enable-threads=posix \
+#     --disable-checking --disable-multilib && make -j${nproc} && make install
+
+## binutils 2.32 or higher
+ARG TARDIR=$WORKDIR/binutils
+RUN mkdir -p $TARDIR
+RUN tar -zvxf binutils-2.36.tar.gz -C $TARDIR --strip-components 1 && \
+    cd $TARDIR/ && ./configure --prefix=/usr/local && make -j${nproc} && \
+    make install
+
+## nasm 2.14 or higher
+ARG TARDIR=$WORKDIR/nasm
+RUN mkdir -p $TARDIR
+RUN tar -zvxf nasm-2.15.tar.gz -C $TARDIR --strip-components 1 && \
+    cd $TARDIR/ && ./configure --prefix=/usr/local && make -j${nproc} && \
+    make install
+
+## GCC 10.2 or higer upgrade
+### gcc install
+ARG TARDIR=$WORKDIR/gcc
+ENV GCC_INSTALL=/usr/local/gcc-10.2.0
+RUN mkdir -p $TARDIR
+RUN tar -zvxf gcc-10.2.0.tar.gz -C $TARDIR --strip-components 1 && cd $TARDIR/ \
+    && ./configure --prefix=$GCC_INSTALL --enable-threads=posix \
+    --disable-checking --disable-multilib && make -j${nproc} && make install
+
+ARG TARDIR=/usr/local/go1.15
+ENV GO_INSTALL=$TARDIR
+RUN mkdir -p $TARDIR
+RUN tar -zxvf go1.15.linux-amd64.tar.gz -C $TARDIR --strip-components 1
+RUN ln -s ${GO_INSTALL}/bin/go /usr/bin/go
