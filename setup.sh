@@ -1,4 +1,7 @@
 #!/bin/bash
+
+/usr/bin/python3 generate.py -k
+
 image_base=docker4dev_base
 image_subd=(docker4kernel)
 
@@ -24,10 +27,8 @@ docker build --no-cache --network=host -t ${imagename} .
 
 elif [ "${options}" == "-s" ] || [ "${options}" == "--split" ]; then
 
-docker build -t ${imagename} --target ${imagename} .
+docker build --no-cache --network=host -t ${imagename} --target ${imagename} .
 
 else
     echo "Option $options is unsupported"
 fi
-
-docker build --no-cache --network=host -t clayding/kerneldeploymentplat .
