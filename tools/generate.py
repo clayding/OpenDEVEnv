@@ -1,7 +1,7 @@
-from assembler import Assembler
 import options
 import getopt
 import utils
+import base
 
 def parse_options(argv):
     exename = argv[0]
@@ -23,5 +23,12 @@ def parse_options(argv):
            ab.clean()
 
 if __name__ == "__main__":
-    parse_options(utils.sys_get_allargs())
+    #parse_options(utils.sys_get_allargs())
+    try:
+        config = base.BaseConfig()
+        ret = config.setup()
+    except Exception as esc:
+        ret = 1
+        import traceback
+        traceback.print_exc()
 
