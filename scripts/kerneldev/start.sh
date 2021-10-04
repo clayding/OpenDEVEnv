@@ -30,7 +30,7 @@
 #su - mec
 
 MYUSER=root
-echo "source /opt/scripts/kerneldev/setupvars.sh" >> /root/.bashrc
+echo "source /opt/scripts/setupvars.sh" >> /root/.bashrc
 cp /opt/scripts/.vimrc /root/
 su - ${MYUSER}
 
