@@ -1,16 +1,12 @@
 
 ubuntu: 
-    version: 18.04
-    dependency: apt-get clean && \
-        apt-get update && apt-get upgrade -y --fix-missing && \
-        \ &&
-        apt-get update && apt-get install -y git vim cmake sudo libsdl2-dev nasm yasm \
-        libboost-all-dev libgflags-dev libgoogle-glog-dev protobuf-compiler libhdf5-dev \
-        lsb-core ethtool quilt autoconf linux-headers-4.15.0-46-generic tk flex pciutils \
-        libnl-route-3-200 graphviz tcl chrpath kmod automake swig lsof dpatch bison \
-        net-tools inetutils-ping wget && \
-        \
-        apt-get install -y qemu libncurses5-dev build-essential
+    version: 20.04
+    dependency: apt-get clean &&
+        apt-get update && apt-get upgrade -y --fix-missing &&
+        apt-get update && apt-get install -y git vim cmake sudo nasm yasm wget
+        curl gcc g++ &&
+        apt-get install -y texinfo automake libncurses5-dev flex libreadline-dev
+        bison gperf libtool libtool-bin bc qemu-system-arm qemu
 centos: 
     version: 7
     dependency: yum clean all && yum makecache && yum -y update && yum -y update \

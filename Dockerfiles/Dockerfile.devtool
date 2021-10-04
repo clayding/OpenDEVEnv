@@ -8,13 +8,13 @@ ARG TARDIR=$PACKINST/gdb
 RUN mkdir -p $TARDIR
 RUN wget -q https://ftp.gnu.org/gnu/gdb/gdb-10.2.tar.gz -O gdb.tar.gz
 RUN tar -xvzf gdb.tar.gz -C $TARDIR --strip-components 1 && cd $TARDIR/ && \
-    ./configure --prefix=/usr/local && make -j${nproc} && make install
+    ./configure --prefix=/usr/local && make -j${nproc} && make install && cd -
 
 ARG TARDIR=$PACKINST/cgdb
 RUN mkdir -p $TARDIR
 RUN git clone https://github.com/cgdb/cgdb.git $TARDIR && cd $TARDIR/ \
     && ./autogen.sh && ./configure --prefix=/usr/local && make -j${nproc} && \
-    make install
+    make install && cd -
 
 ARG TARDIR=$PACKINST/htop
 RUN mkdir -p $TARDIR
@@ -22,7 +22,7 @@ RUN wget -q https://github.com/htop-dev/htop/archive/refs/tags/3.0.5.tar.gz\
     -O htop.tar.gz 
 RUN tar -xvzf htop.tar.gz -C $TARDIR --strip-components 1 && cd $TARDIR/ \
     && ./autogen.sh && ./configure --prefix=/usr/local && make -j${nproc} && \
-    make install
+    make install && cd -
 
 ARG TARDIR=$PACKINST/global
 RUN mkdir -p $TARDIR
@@ -30,7 +30,7 @@ RUN wget -q https://ftp.gnu.org/pub/gnu/global/global-6.6.tar.gz \
     -O global.tar.gz
 RUN tar -xvzf global.tar.gz -C $TARDIR --strip-components 1 && cd $TARDIR/ \
     && /bin/bash reconf.sh && ./configure --prefix=/usr/local && \
-    make -j${nproc} && make install
+    make -j${nproc} && make install && cd -
 # To configure GNU global in VScode, add below lines to setting.json
 # {
 #     "gnuGlobal.globalExecutable": "/usr/local/bin/global",
@@ -42,8 +42,8 @@ RUN tar -xvzf global.tar.gz -C $TARDIR --strip-components 1 && cd $TARDIR/ \
 #    zsh -c "$(wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
 
 # vimplus
-RUN git clone https://github.com/chxuan/vimplus.git ~/.vimplus && cd ~/.vimplus \
-    && ./install.sh
+#RUN git clone https://github.com/chxuan/vimplus.git ~/.vimplus && cd ~/.vimplus \
+#    && ./install.sh
 
 ## CMake
 ARG TARDIR=/usr/local/cmake
@@ -58,19 +58,19 @@ RUN tar -xvzf cmake.tar.gz -C $TARDIR --strip-components 1
 ARG TARDIR=$PACKINST/gmp
 RUN mkdir -p $TARDIR
 RUN tar -jvxf gmp-6.1.0.tar.bz2 -C $TARDIR --strip-components 1 && cd $TARDIR/ \
-    && ./configure --prefix=/usr/local && make -j${nproc} && make install
+    && ./configure --prefix=/usr/local && make -j${nproc} && make install && cd -
 
 ### mpfr install
 ARG TARDIR=$PACKINST/mpfr
 RUN mkdir -p $TARDIR
 RUN tar -jvxf mpfr-3.1.4.tar.bz2 -C $TARDIR --strip-components 1 && cd $TARDIR/ \
-    && ./configure --prefix=/usr/local && make -j${nproc} && make install
+    && ./configure --prefix=/usr/local && make -j${nproc} && make install && cd -
 
 ### mpc install
 ARG TARDIR=$PACKINST/mpc
 RUN mkdir -p $TARDIR
 RUN tar -zvxf mpc-1.0.3.tar.gz -C $TARDIR --strip-components 1 && cd $TARDIR/ \
-    && ./configure --prefix=/usr/local && make -j${nproc} && make install
+    && ./configure --prefix=/usr/local && make -j${nproc} && make install && cd -
 
 ### gcc install
 # ARG TARDIR=$PACKINST/gcc
@@ -85,14 +85,14 @@ ARG TARDIR=$PACKINST/binutils
 RUN mkdir -p $TARDIR
 RUN tar -zvxf binutils-2.36.tar.gz -C $TARDIR --strip-components 1 && \
     cd $TARDIR/ && ./configure --prefix=/usr/local && make -j${nproc} && \
-    make install
+    make install && cd -
 
 ## nasm 2.14 or higher
 ARG TARDIR=$PACKINST/nasm
 RUN mkdir -p $TARDIR
 RUN tar -zvxf nasm-2.15.tar.gz -C $TARDIR --strip-components 1 && \
     cd $TARDIR/ && ./configure --prefix=/usr/local && make -j${nproc} && \
-    make install
+    make install && cd -
 
 ## GCC 10.2 or higer upgrade
 ### gcc install
@@ -102,12 +102,14 @@ RUN mkdir -p $TARDIR
 RUN wget -q https://ftp.gnu.org/gnu/gcc/gcc-10.2.0/gcc-10.2.0.tar.gz \
     -O gcc.tar.gz
 RUN tar -zvxf gcc.tar.gz -C $TARDIR --strip-components 1 && cd $TARDIR/ \
+    && export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH \
     && ./configure --prefix=$GCC_INSTALL --enable-threads=posix \
-    --disable-checking --disable-multilib && make -j${nproc} && make install
+    --disable-checking --disable-multilib && make -j${nproc} && make install \
+    && cd -
 
-ARG TARDIR=/usr/local/go
-ENV GO_INSTALL=$TARDIR
-RUN mkdir -p $TARDIR
-RUN wget -q https://golang.org/dl/go1.15.15.linux-amd64.tar.gz -O go.tar.gz
-RUN tar -zxvf go.tar.gz -C $TARDIR --strip-components 1
-RUN ln -s ${GO_INSTALL}/bin/go /usr/bin/go
+# ARG TARDIR=/usr/local/go
+# ENV GO_INSTALL=$TARDIR
+# RUN mkdir -p $TARDIR
+# RUN wget -q https://golang.org/dl/go1.15.15.linux-amd64.tar.gz -O go.tar.gz
+# RUN tar -zxvf go.tar.gz -C $TARDIR --strip-components 1
+# RUN ln -s ${GO_INSTALL}/bin/go /usr/bin/go
