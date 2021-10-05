@@ -5,7 +5,7 @@ import time
 import utils
 
 class Assembler(object):
-    def __init__(self, dockfiles_path):
+    def __init__(self, dockfiles_path, http_proxy):
         self.devtool = 'Dockerfiles/Dockerfile.devtool'
         self.kerneld = 'Dockerfiles/Dockerfile.kerneldev'
         self.dependf = 'Dockerfiles/Dockerfile.dependency'
@@ -18,6 +18,7 @@ class Assembler(object):
         self.readbuf = ''
         self.writbuf = ''
         self.signatu = 'clayding <gdskclay@gmail.com>'
+        self.proxycf = http_proxy
 
 
     def read(self, file):
@@ -37,15 +38,24 @@ class Assembler(object):
         dstbuff = self.read(dst)
 
         distinfo = utils.platform_dist()
-        print(self.get_dist_version(distinfo[0]))
-        base_ver = distinfo[0] + ':' + str(self.get_dist_version(distinfo[0]))
-        base_dep = self.get_dist_dependency(distinfo[0])
+        if not distinfo:
+            return
+        disinfo_hdr=distinfo[0].lower()
+        base_ver = disinfo_hdr + ':' + str(self.get_dist_version(disinfo_hdr))
+        base_dep = self.get_dist_dependency(disinfo_hdr)
+
+        render_dict = dict(DOCKERFILE_DEVTOOL=srcbuff,
+                           DOCKERFILE_OS_VERSION=base_ver,
+                           DOCKERFILE_HTTP_PROXY=self.proxycf,
+                           DOCKERFILE_DEPENDENCIES=base_dep,
+                           DOCKERFILE_MAINTAINER=self.signatu)
+        '''Remove NULL value'''
+        for key in list(render_dict.keys()):
+            if not render_dict[key]:
+                render_dict.pop(key)
 
         template= Template(dstbuff)
-        content = template.render(DOCKERFILE_DEVTOOL=srcbuff,
-                                  DOCKERFILE_OS_VERSION=base_ver,
-                                  DOCKERFILE_DEPENDENCIES=base_dep,
-                                  DOCKERFILE_MAINTAINER=self.signatu)
+        content = template.render(render_dict)
         #print(content)
 
         self.write(new, content)
@@ -55,7 +65,7 @@ class Assembler(object):
         dirname = dirname.strip().rstrip('/')
         isexist = utils.os_is_path_exist(dirname)
         if not isexist:
-            os.makedirs(dirname)
+            utils.os_makedirs(dirname)
             print('Create new directory:{}' .format(dirname))
         return dirname
     

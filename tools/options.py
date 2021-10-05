@@ -28,6 +28,10 @@ class OptionsParser(argparse.ArgumentParser):
                           help = 'mount host directories to conatiner',
                           type = str,
                           default = '')
+        self.add_argument('-p', '--proxy',
+                          help = 'set the http proxy to build image',
+                          type = str,
+                          default = '')
         self.add_argument('-s', '--stage',
                           help = 'build docker images in split stages',
                           action='store_true')

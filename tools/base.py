@@ -21,7 +21,7 @@ class BaseConfig(object):
             self.buildpath = os.path.dirname(os.path.abspath(__file__))
 
         self.buildstag = self.option.stage
-        print(self.buildstag)
+        self.proxy = self.option.proxy
         self.imagename = self.option.tag
         if self.buildstag:
             self.imagename = '-s %s' % self.imagename
@@ -32,18 +32,10 @@ class BaseConfig(object):
         self.mountdir  = self.option.mount
         print(self.mountdir)
         self.apcommand = self.option.command
-        print(os.readlink(__file__))
-        print(os.path.join("tools", "bash.h"))
-
-        """ try:
-            if os.readlink(__file__) != os.path.join("tools", "bash.h"):
-                raise OSError("The link target does not exist.")
-        except OSError:
-            self.logger.error("setup script must be run in the top directory. (not in this docker directory)")
-            exit(1) """
     
-    def generate_dockerfile(self, dockerfile_path):
-        self.assemb = assembler.Assembler(dockerfile_path)
+    def generate_dockerfile(self, dockerfile_path, http_proxy):
+        self.assemb = assembler.Assembler(dockerfile_path, http_proxy)
+        self.assemb.generate_kernel()
 
     def _is_file_newer(self, file, timestamp):
         """
@@ -88,6 +80,7 @@ class BaseConfig(object):
         """
 
         self.set_vars()
+        self.generate_dockerfile(self.buildpath, self.proxy)
         
         rebuild = False
         nocache = "false"
@@ -137,7 +130,7 @@ class BaseConfig(object):
                 % (self.buildpath, nocache, self.imagename)
             self.logger.note("Building docker builder image... (This may take some time.)")
             print(cmd)
-            #subprocess.check_output(cmd, shell = True)
+            subprocess.check_output(cmd, shell = True)
 
     def start_image(self):
         """
@@ -155,7 +148,7 @@ class BaseConfig(object):
             os.getenv("HOME"), self.mountdir, self.apcommand)
         self.logger.note("Running build machine...")
         print(cmd)
-        #return subprocess.call(cmd, shell = True)
+        return subprocess.call(cmd, shell = True)
 
     def setup(self):
         self.check_docker()

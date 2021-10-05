@@ -1,6 +1,7 @@
 import os
 import sys
 import platform
+import distro
 
 def os_concat_path(path1, path2):
     return os.path.join(path1, path2)
@@ -20,8 +21,20 @@ def os_sym_link(src, dst):
     else:
         os.unlink(dst)
 
+def os_makedirs(dirname):
+    return os.makedirs(dirname)
+
 def sys_get_allargs():
     return sys.argv
 
 def platform_dist():
-    return platform.dist()
+    pversion=platform.python_version()
+    ''' 3.8.1 '''
+    if pversion[0] == '3':
+        '''python version < 3.8'''
+        if int(pversion[2]) < 8:
+            return platform.dist()
+        else:
+            return distro.linux_distribution()
+    else:
+        print("platform.dist not supported")
