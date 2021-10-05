@@ -17,6 +17,9 @@ class OptionsParser(argparse.ArgumentParser):
         self.add_argument('-d', '--distclean',
                           help = 'clean all',
                           action='store_true')
+        self.add_argument('-g', '--generate',
+                          help = 'generate Dockerfile only, not build image',
+                          action='store_true')
         self.add_argument('-n', '--name',
                           help = 'set hostname in container',
                           type = str,

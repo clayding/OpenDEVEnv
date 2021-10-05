@@ -24,6 +24,7 @@ class BaseConfig(object):
 
         self.buildstag = self.option.stage
         self.distclean = self.option.distclean
+        self.gendocker = self.option.generate
         self.httpproxy = self.option.proxy
         self.kernelblt = self.option.kernel
         self.imagename = self.option.tag
@@ -94,8 +95,11 @@ class BaseConfig(object):
         if self.distclean:
             self.clean_docker()
             exit(0)
+
         self.generate_dockerfile(self.buildpath, self.httpproxy)
-        
+        if self.gendocker: '''Just generate a new dockerfile'''
+            exit(0)
+
         rebuild = False
         nocache = "false"
         try:
