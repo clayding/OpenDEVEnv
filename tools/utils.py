@@ -9,6 +9,9 @@ def os_concat_path(path1, path2):
 def os_get_rel_path(path):
     return os_concat_path(os.getcwd(), path)
 
+def os_get_abs_path(path):
+    return os.path.abspath(path)
+
 def os_get_abs_dirname(path):
     return os.path.abspath(os.path.dirname(path))
 

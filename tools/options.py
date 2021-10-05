@@ -8,7 +8,7 @@ class OptionsParser(argparse.ArgumentParser):
         self.add_argument('-b', '--buildir',
                           help = 'set build directory path',
                           type = str, 
-                          default = '',)
+                          default = './',)
         self.add_argument('-c', '--command',
                           help = 'append command to docker run',
                           type = str, 
@@ -39,4 +39,9 @@ class OptionsParser(argparse.ArgumentParser):
                           help ='tag name of docker images to build',
                           type = str,
                           default = 'docker4dev:latest')
+        self.add_argument('-v', '--verbose',
+                          help ='set debug level to show message in run-time(\
+                                debug:0, note:1, warn:2, default:3)',
+                          type = int,
+                          default = 3)
         return self.parse_args()

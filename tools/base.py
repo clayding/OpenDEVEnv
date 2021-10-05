@@ -3,7 +3,9 @@ import os
 import re
 import subprocess
 import time
+import hashlib
 import logger
+import utils
 import options
 import assembler
 
@@ -12,8 +14,8 @@ class BaseConfig(object):
         # Any change in the listed items will triger a rebuild
         self.checkfilelist = "Dockerfile"
         self.checkvarslist = ''
-        self.logger = logger.Logger()
         self.option = options.OptionsParser().default_options()
+        self.logger = logger.Logger(self.option.verbose, True)
     
     def set_vars(self):
         self.buildpath = self.option.buildir
@@ -21,8 +23,10 @@ class BaseConfig(object):
             self.buildpath = os.path.dirname(os.path.abspath(__file__))
 
         self.buildstag = self.option.stage
-        self.proxy = self.option.proxy
+        self.httpproxy = self.option.proxy
+        self.kernelblt = self.option.kernel
         self.imagename = self.option.tag
+        self.imageorig = self.option.tag
         if self.buildstag:
             self.imagename = '-s %s' % self.imagename
         else:
@@ -30,12 +34,18 @@ class BaseConfig(object):
 
         self.hostname  = self.option.name
         self.mountdir  = self.option.mount
-        print(self.mountdir)
+        if self.mountdir:
+            self.mountdir = "-v %s:/opt/hostshare" % self.mountdir
+            self.logger.note("Mount %s on Host to /opt/hostshare" % self.mountdir)
         self.apcommand = self.option.command
     
     def generate_dockerfile(self, dockerfile_path, http_proxy):
         self.assemb = assembler.Assembler(dockerfile_path, http_proxy)
-        self.assemb.generate_kernel()
+        if self.kernelblt:
+            self.assemb.generate_kernel()
+            self.logger.debug("Kernel Dockerfile generated")
+        else:
+            self.logger.warn("No new Dockerfiles generated")
 
     def _is_file_newer(self, file, timestamp):
         """
@@ -80,31 +90,35 @@ class BaseConfig(object):
         """
 
         self.set_vars()
-        self.generate_dockerfile(self.buildpath, self.proxy)
+        self.generate_dockerfile(self.buildpath, self.httpproxy)
         
         rebuild = False
         nocache = "false"
         try:
             """ Get build timestamp """
-            output = subprocess.check_output( \
-                "docker inspect --format={{.Created}} builder:uml 2>/dev/null", \
-                shell = True)
-            m = re.match(r'(^[0-9]{4}-[0-9]{2}-[0-9]{2})[a-zA-Z ]{1}([0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{6}).*$', output)
+            cmd = "docker inspect --format={{.Created}} %s 2>/dev/null" \
+                  % self.imageorig
+            output = subprocess.check_output(cmd, shell = True)
+            m = re.match(r'(^[0-9]{4}-[0-9]{2}-[0-9]{2})[a-zA-Z ]{1}([0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{6}).*$', output.decode('utf-8'))
             created = time.mktime(time.strptime('%s %s' % (m.group(1), m.group(2)), '%Y-%m-%d %H:%M:%S.%f'))
 
             # Check file 'Modify' timestamp of checkfilelist
             for l in self.checkfilelist.split():
-                p = "%s/%s" % self.buildpath % l
+                p = "%s/%s" % (self.buildpath, l)
                 if os.path.isdir(p):
                     for root, _, files in os.walk(p):
                         for f in files:
                             file = os.path.join(root, f)
                             if self._is_file_newer(file, created):
                                 rebuild = True
+                                self.logger.note("%s is newer, rebuild enabled" \
+                                                 % utils.os_get_abs_path(p))
                                 break
                 elif os.path.isfile(p):
                     if self._is_file_newer(p, created):
                         rebuild = True
+                        self.logger.note("%s is newer, rebuild enabled" \
+                                         % utils.os_get_abs_path(p))
                         break
 
             # Check variable changes of checkvarslist
@@ -116,6 +130,7 @@ class BaseConfig(object):
                 if open(".sigdata", 'r').read() != datahash:
                     rebuild = True
                     nocache = "true"
+                    self.logger.note("Items in checkvarslist changed, rebuild enabled" %p)
             except IOError:
                 rebuild = True
                 nocache = "true"
@@ -124,12 +139,13 @@ class BaseConfig(object):
 
         except subprocess.CalledProcessError:
             rebuild = True
+            self.logger.error("subprocess.CalledProcessError")
 
         if rebuild:
             cmd = "cd %s; docker build --no-cache=%s %s ./" \
                 % (self.buildpath, nocache, self.imagename)
             self.logger.note("Building docker builder image... (This may take some time.)")
-            print(cmd)
+            self.logger.debug(cmd)
             subprocess.check_output(cmd, shell = True)
 
     def start_image(self):
@@ -143,11 +159,11 @@ class BaseConfig(object):
             -v /etc/localtime:/etc/localtime \
             -v /tmp/.X11-unix:/tmp/.X11-unix \
             -v /dev:/dev \
-            %s %s" \
+            %s %s %s" \
             % (self.hostname, psedottyargs, \
-            os.getenv("HOME"), self.mountdir, self.apcommand)
+            os.getenv("HOME"), self.mountdir, self.imageorig, self.apcommand)
         self.logger.note("Running build machine...")
-        print(cmd)
+        self.logger.debug(cmd)
         return subprocess.call(cmd, shell = True)
 
     def setup(self):
