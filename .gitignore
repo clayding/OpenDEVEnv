@@ -1,0 +1,4 @@
+# Ignore directories or files
+Dockerfile
+Dockerfiles/temp/
+tools/__pycache__/
