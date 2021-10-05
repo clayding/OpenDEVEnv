@@ -2,3 +2,4 @@
 Dockerfile
 Dockerfiles/temp/
 tools/__pycache__/
+.sigdata
