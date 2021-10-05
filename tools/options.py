@@ -41,7 +41,7 @@ class OptionsParser(argparse.ArgumentParser):
                           default = 'docker4dev:latest')
         self.add_argument('-v', '--verbose',
                           help ='set debug level to show message in run-time(\
-                                debug:0, note:1, warn:2, default:3)',
+                                debug:0, note:1, warn:2, default:1)',
                           type = int,
-                          default = 3)
+                          default = 1)
         return self.parse_args()

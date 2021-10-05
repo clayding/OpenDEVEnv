@@ -23,6 +23,7 @@ class BaseConfig(object):
             self.buildpath = os.path.dirname(os.path.abspath(__file__))
 
         self.buildstag = self.option.stage
+        self.distclean = self.option.distclean
         self.httpproxy = self.option.proxy
         self.kernelblt = self.option.kernel
         self.imagename = self.option.tag
@@ -90,6 +91,9 @@ class BaseConfig(object):
         """
 
         self.set_vars()
+        if self.distclean:
+            self.clean_docker()
+            exit(0)
         self.generate_dockerfile(self.buildpath, self.httpproxy)
         
         rebuild = False
@@ -165,6 +169,14 @@ class BaseConfig(object):
         self.logger.note("Running build machine...")
         self.logger.debug(cmd)
         return subprocess.call(cmd, shell = True)
+
+    def clean_docker(self):
+        cleansh = utils.os_concat_path(utils.os_get_abs_dirname(__file__), "clean.sh")
+        if utils.os_is_path_exist(cleansh):
+            self.logger.note("Cleaning invalid docker images and exited containers")
+            subprocess.check_output("sh %s" % cleansh, shell = True)
+        else:
+            self.logger.error("Not found %s" % cleansh)
 
     def setup(self):
         self.check_docker()
