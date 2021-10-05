@@ -1,6 +1,9 @@
 [submodule "3rdparty/runninglinuxkernel_4.0"]
 	path = 3rdparty/runninglinuxkernel_4.0
 	url = https://github.com/figozhang/runninglinuxkernel_4.0.git
+[submodule "3rdparty/runninglinuxkernel_5.0"]
+	path = 3rdparty/runninglinuxkernel_5.0
+	url = https://github.com/figozhang/runninglinuxkernel_5.0.git
 [submodule "3rdparty/Linux-Device-Driver-Development-Cookbook"]
 	path = 3rdparty/Linux-Device-Driver-Development-Cookbook
 	url = https://github.com/PacktPublishing/Linux-Device-Driver-Development-Cookbook.git
