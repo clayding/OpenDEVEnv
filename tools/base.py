@@ -97,7 +97,8 @@ class BaseConfig(object):
             exit(0)
 
         self.generate_dockerfile(self.buildpath, self.httpproxy)
-        if self.gendocker: '''Just generate a new dockerfile'''
+        '''Just generate a new dockerfile'''
+        if self.gendocker:
             exit(0)
 
         rebuild = False
@@ -186,3 +187,4 @@ class BaseConfig(object):
         self.check_docker()
         self.build_image()
         return self.start_image()
+
