@@ -21,9 +21,10 @@ ENV CODDIR=/opt/codes
 ENV SHADIR=/opt/shared
 
 ARG SUBDIR=kerneldev/
-COPY ./scripts/$SUBDIR  $SCRDIR
-COPY ./packages/$SUBDIR $PACDIR
-COPY ./codes/$SUBDIR    $CODDIR
+ARG FROMDIR=./LOCAL
+COPY $FROMDIR/scripts/$SUBDIR  $SCRDIR
+COPY $FROMDIR/packages/$SUBDIR $PACDIR
+COPY $FROMDIR/codes/$SUBDIR    $CODDIR
 
 RUN mkdir -p $SHADIR
 RUN chmod +x $SCRDIR/*
