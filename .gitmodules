@@ -17,3 +17,6 @@
 [submodule "3rdparty/Linux-Device-Drivers-Development"]
 	path = 3rdparty/Linux-Device-Drivers-Development
 	url = https://github.com/PacktPublishing/Linux-Device-Drivers-Development.git
+[submodule "3rdparty/rpi_linux"]
+	path = 3rdparty/rpi_linux
+	url = https://github.com/raspberrypi/linux.git
