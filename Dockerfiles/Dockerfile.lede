@@ -1,0 +1,11 @@
+{{ DOCKERFILE_BASE }}
+
+FROM docker4dev_base as docker4lede
+
+RUN {{ DOCKERFILE_LEDE_DEP }}
+
+# Create and switch to new user
+ARG NUSER=shikundi
+RUN useradd -m $NUSER -s /bin/bash
+RUN usermod -aG sudo $NUSER
+RUN echo "$NUSER:123456" | chpasswd

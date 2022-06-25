@@ -12,11 +12,11 @@ import assembler
 class BaseConfig(object):
     def __init__(self):
         # Any change in the listed items will triger a rebuild
-        self.checkfilelist = "Dockerfile"
+        self.checkfilelist = []
         self.checkvarslist = ''
         self.option = options.OptionsParser().default_options()
         self.logger = logger.Logger(self.option.verbose, True)
-    
+
     def set_vars(self):
         self.buildpath = self.option.buildir
         if not self.buildpath:
@@ -27,6 +27,8 @@ class BaseConfig(object):
         self.gendocker = self.option.generate
         self.httpproxy = self.option.proxy
         self.kernelblt = self.option.kernel
+        self.ledebuilt = self.option.lede
+        self.devbaseim = self.option.devbase
         self.imagename = self.option.tag
         self.imageorig = self.option.tag
         if self.buildstag:
@@ -41,19 +43,28 @@ class BaseConfig(object):
             self.logger.note("Mount %s on Host to /opt/hostshare" % self.mountdir)
         self.apcommand = self.option.command
     
-    def generate_dockerfile(self, dockerfile_path, http_proxy):
-        self.assemb = assembler.Assembler(dockerfile_path, http_proxy)
+    def _generate_dockerfile(self):
+        self.assemb = assembler.Assembler(self.buildpath, self.httpproxy, self.checkfilelist)
+##############################################ADD NEW HERE##############################################################
+        description = ""
         if self.kernelblt:
-            self.assemb.generate_kernel()
-            self.logger.debug("Kernel Dockerfile generated")
-        else:
+            desc = "kernel"
+        elif self.ledebuilt:
+            desc = "lede"
+        elif self.devbaseim:
+            desc = "base"
+#######################################################################################################################
+
+        if not desc:
             self.logger.warn("No new Dockerfiles generated")
+        else:
+            self.assemb.generate(desc)
+            self.logger.debug("%s Dockerfile generated" %desc)
 
     def _is_file_newer(self, file, timestamp):
         """
         Check if the file modify time newer than the timestamp
         """
-
         return True if os.stat(file).st_mtime > timestamp else False
 
     def check_docker(self):
@@ -96,7 +107,7 @@ class BaseConfig(object):
             self.clean_docker()
             exit(0)
 
-        self.generate_dockerfile(self.buildpath, self.httpproxy)
+        self._generate_dockerfile()
         '''Just generate a new dockerfile'''
         if self.gendocker:
             exit(0)
@@ -105,14 +116,15 @@ class BaseConfig(object):
         nocache = "false"
         try:
             """ Get build timestamp """
-            cmd = "docker inspect --format={{.Created}} %s 2>/dev/null" \
+            #cmd = "docker inspect --format={{.Created}} %s 2>/dev/null" \
+            cmd = "docker inspect --format={{.Metadata.LastTagTime}} %s 2>/dev/null" \
                   % self.imageorig
             output = subprocess.check_output(cmd, shell = True)
             m = re.match(r'(^[0-9]{4}-[0-9]{2}-[0-9]{2})[a-zA-Z ]{1}([0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{6}).*$', output.decode('utf-8'))
             created = time.mktime(time.strptime('%s %s' % (m.group(1), m.group(2)), '%Y-%m-%d %H:%M:%S.%f'))
 
             # Check file 'Modify' timestamp of checkfilelist
-            for l in self.checkfilelist.split():
+            for l in self.checkfilelist:
                 p = "%s/%s" % (self.buildpath, l)
                 if os.path.isdir(p):
                     for root, _, files in os.walk(p):
@@ -148,14 +160,23 @@ class BaseConfig(object):
 
         except subprocess.CalledProcessError:
             rebuild = True
-            self.logger.error("subprocess.CalledProcessError")
-
+            #self.logger.error("subprocess.CalledProcessError")
+        nocache = "false"
         if rebuild:
             cmd = "cd %s; docker build --no-cache=%s %s ./" \
                 % (self.buildpath, nocache, self.imagename)
             self.logger.note("Building docker builder image... (This may take some time.)")
             self.logger.debug(cmd)
-            subprocess.check_output(cmd, shell = True)
+            # subprocess.check_output(cmd, shell = True)
+            popen = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, \
+                            stderr = subprocess.PIPE, universal_newlines = True, bufsize = 1)
+            for line in iter(popen.stdout.readline, b''):
+                if line:
+                     self.logger.debug(line)
+                else:
+                    break
+            popen.stdout.close()
+            popen.wait()
 
     def start_image(self):
         """

@@ -5,6 +5,9 @@ class OptionsParser(argparse.ArgumentParser):
         super(OptionsParser, self).__init__()
     
     def default_options(self):
+        self.add_argument('-a', '--devbase',
+                          help = 'generate Dockerfile for dev base',
+                          action='store_true')
         self.add_argument('-b', '--buildir',
                           help = 'set build directory path',
                           type = str, 
@@ -24,6 +27,9 @@ class OptionsParser(argparse.ArgumentParser):
                           help = 'set hostname in container',
                           type = str,
                           default = 'Dev')
+        self.add_argument('-l', '--lede',
+                          help = 'generate Dockerfile for Lede',
+                          action='store_true')
         self.add_argument('-k', '--kernel',
                           help = 'generate Dockerfile for Kernel',
                           action='store_true')

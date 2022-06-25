@@ -1,12 +1,27 @@
 
 ubuntu: 
-    version: 20.04
+    version: 18.04
+    sourcelist: cp /etc/apt/sources.list /etc/apt/sources.list.backup && sed -i 's/archive.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
     dependency: apt-get clean &&
         apt-get update && apt-get upgrade -y --fix-missing &&
         apt-get update && apt-get install -y git vim cmake sudo nasm yasm wget
-        curl gcc g++ &&
+        curl gcc g++ bzip2 libncursesw5-dev &&
         apt-get install -y texinfo automake libncurses5-dev flex libreadline-dev
-        bison gperf libtool libtool-bin bc qemu-system-arm qemu
+        bison gperf &&
+        apt-get install -y software-properties-common zsh tmux global &&
+        apt-add-repository ppa:neovim-ppa/stable && apt-get update &&
+        apt-get install -y neovim
+
+    kernel_depend: apt-get install -y libtool libtool-bin bc qemu-system-arm qemu
+        libssl-dev libgmp-dev libmpc-dev
+
+    lede_depend: apt update -y && apt full-upgrade -y &&
+        apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential
+        bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib
+        git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev
+        libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz
+        mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pip qemu-utils
+        rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
 centos: 
     version: 7
     dependency: yum clean all && yum makecache && yum -y update && yum -y update \

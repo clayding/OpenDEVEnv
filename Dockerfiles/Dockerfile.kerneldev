@@ -1,21 +1,8 @@
-FROM {{ DOCKERFILE_OS_VERSION }} as docker4dev_base
-MAINTAINER {{ DOCKERFILE_MAINTAINER }}
-
-ENV DEBIAN_FRONTEND noninteractive
-{% if DOCKERFILE_HTTP_PROXY %}
-ENV http_proxy {{ DOCKERFILE_HTTP_PROXY }}
-ENV https_proxy {{ DOCKERFILE_HTTP_PROXY }}
-{% else %}
-#ENV http_proxy {{ DOCKERFILE_HTTP_PROXY }}
-#ENV https_proxy {{ DOCKERFILE_HTTP_PROXY }}
-{% endif %}
-RUN {{ DOCKERFILE_DEPENDENCIES }}
-
-{{ DOCKERFILE_BEAUTY }}
-
-{{ DOCKERFILE_DEVTOOL }}
+{{ DOCKERFILE_BASE }}
 
 FROM docker4dev_base as docker4kernel
+
+RUN {{ DOCKERFILE_KERNEL_DEP }}
 
 ENV SCRDIR=/opt/scripts
 ENV PACDIR=/opt/packages

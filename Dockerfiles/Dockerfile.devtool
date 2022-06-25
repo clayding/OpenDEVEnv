@@ -4,11 +4,11 @@ ARG PACKINST=/opt/packages_install/
 WORKDIR $PACKAGES
 COPY ./Local/packages/devtools ./
 
-ARG TARDIR=$PACKINST/gdb
-RUN mkdir -p $TARDIR
-RUN wget -q https://ftp.gnu.org/gnu/gdb/gdb-10.2.tar.gz -O gdb.tar.gz
-RUN tar -xvzf gdb.tar.gz -C $TARDIR --strip-components 1 && cd $TARDIR/ && \
-    ./configure --prefix=/usr/local && make -j${nproc} && make install && cd -
+#ARG TARDIR=$PACKINST/gdb
+#RUN mkdir -p $TARDIR
+#RUN wget -q https://ftp.gnu.org/gnu/gdb/gdb-10.2.tar.gz -O gdb.tar.gz
+#RUN tar -xvzf gdb.tar.gz -C $TARDIR --strip-components 1 && cd $TARDIR/ && \
+#    ./configure --prefix=/usr/local && make -j${nproc} && make install && cd -
 
 ARG TARDIR=$PACKINST/cgdb
 RUN mkdir -p $TARDIR
@@ -24,13 +24,14 @@ RUN tar -xvzf htop.tar.gz -C $TARDIR --strip-components 1 && cd $TARDIR/ \
     && ./autogen.sh && ./configure --prefix=/usr/local && make -j${nproc} && \
     make install && cd -
 
-ARG TARDIR=$PACKINST/global
-RUN mkdir -p $TARDIR
-RUN wget -q https://ftp.gnu.org/pub/gnu/global/global-6.6.tar.gz \
-    -O global.tar.gz
-RUN tar -xvzf global.tar.gz -C $TARDIR --strip-components 1 && cd $TARDIR/ \
-    && /bin/bash reconf.sh && ./configure --prefix=/usr/local && \
-    make -j${nproc} && make install && cd -
+#ARG TARDIR=$PACKINST/global
+#RUN mkdir -p $TARDIR
+#RUN wget -q https://ftp.gnu.org/pub/gnu/global/global-6.6.tar.gz \
+#    -O global.tar.gz
+#RUN tar -xvzf global.tar.gz -C $TARDIR --strip-components 1 && cd $TARDIR/ \
+#    && /bin/bash reconf.sh && ./configure --prefix=/usr/local && \
+#    make -j${nproc} && make install && cd -
+
 # To configure GNU global in VScode, add below lines to setting.json
 # {
 #     "gnuGlobal.globalExecutable": "/usr/local/bin/global",
@@ -53,24 +54,28 @@ RUN wget -q "https://cmake.org/files/v3.21/cmake-3.21.1-linux-x86_64.tar.gz" \
     -O cmake.tar.gz
 RUN tar -xvzf cmake.tar.gz -C $TARDIR --strip-components 1
 
-## GCC 8.2 or higer upgrade
-### gmp install
-ARG TARDIR=$PACKINST/gmp
-RUN mkdir -p $TARDIR
-RUN tar -jvxf gmp-6.1.0.tar.bz2 -C $TARDIR --strip-components 1 && cd $TARDIR/ \
-    && ./configure --prefix=/usr/local && make -j${nproc} && make install && cd -
+### GCC 8.2 or higer upgrade
+## gmp install
+#RUN apt-get install libgmp-dev
+#Or
+#ARG TARDIR=$PACKINST/gmp
+#RUN mkdir -p $TARDIR
+#RUN tar -jvxf gmp-6.1.0.tar.bz2 -C $TARDIR --strip-components 1 && cd $TARDIR/ \
+#    && ./configure --prefix=/usr/local && make -j${nproc} && make install && cd -
 
-### mpfr install
-ARG TARDIR=$PACKINST/mpfr
-RUN mkdir -p $TARDIR
-RUN tar -jvxf mpfr-3.1.4.tar.bz2 -C $TARDIR --strip-components 1 && cd $TARDIR/ \
-    && ./configure --prefix=/usr/local && make -j${nproc} && make install && cd -
+## mpfr install
+#ARG TARDIR=$PACKINST/mpfr
+#RUN mkdir -p $TARDIR
+#RUN tar -jvxf mpfr-3.1.4.tar.bz2 -C $TARDIR --strip-components 1 && cd $TARDIR/ \
+#    && ./configure --prefix=/usr/local && make -j${nproc} && make install && cd -
 
-### mpc install
-ARG TARDIR=$PACKINST/mpc
-RUN mkdir -p $TARDIR
-RUN tar -zvxf mpc-1.0.3.tar.gz -C $TARDIR --strip-components 1 && cd $TARDIR/ \
-    && ./configure --prefix=/usr/local && make -j${nproc} && make install && cd -
+## mpc install
+#RUN apt-get install libmpc-dev
+#Or
+#ARG TARDIR=$PACKINST/mpc
+#RUN mkdir -p $TARDIR
+#RUN tar -zvxf mpc-1.0.3.tar.gz -C $TARDIR --strip-components 1 && cd $TARDIR/ \
+#    && ./configure --prefix=/usr/local && make -j${nproc} && make install && cd -
 
 ### gcc install
 # ARG TARDIR=$PACKINST/gcc
@@ -81,31 +86,31 @@ RUN tar -zvxf mpc-1.0.3.tar.gz -C $TARDIR --strip-components 1 && cd $TARDIR/ \
 #     --disable-checking --disable-multilib && make -j${nproc} && make install
 
 ## binutils 2.32 or higher
-ARG TARDIR=$PACKINST/binutils
-RUN mkdir -p $TARDIR
-RUN tar -zvxf binutils-2.36.tar.gz -C $TARDIR --strip-components 1 && \
-    cd $TARDIR/ && ./configure --prefix=/usr/local && make -j${nproc} && \
-    make install && cd -
-
-## nasm 2.14 or higher
-ARG TARDIR=$PACKINST/nasm
-RUN mkdir -p $TARDIR
-RUN tar -zvxf nasm-2.15.tar.gz -C $TARDIR --strip-components 1 && \
-    cd $TARDIR/ && ./configure --prefix=/usr/local && make -j${nproc} && \
-    make install && cd -
+#ARG TARDIR=$PACKINST/binutils
+#RUN mkdir -p $TARDIR
+#RUN tar -zvxf binutils-2.36.tar.gz -C $TARDIR --strip-components 1 && \
+#    cd $TARDIR/ && ./configure --prefix=/usr/local && make -j${nproc} && \
+#    make install && cd -
+#
+### nasm 2.14 or higher
+#ARG TARDIR=$PACKINST/nasm
+#RUN mkdir -p $TARDIR
+#RUN tar -zvxf nasm-2.15.tar.gz -C $TARDIR --strip-components 1 && \
+#    cd $TARDIR/ && ./configure --prefix=/usr/local && make -j${nproc} && \
+#    make install && cd -
 
 ## GCC 10.2 or higer upgrade
 ### gcc install
-ARG TARDIR=$PACKINST/gcc
-ENV GCC_INSTALL=/usr/local/gcc
-RUN mkdir -p $TARDIR
-RUN wget -q https://ftp.gnu.org/gnu/gcc/gcc-10.2.0/gcc-10.2.0.tar.gz \
-    -O gcc.tar.gz
-RUN tar -zvxf gcc.tar.gz -C $TARDIR --strip-components 1 && cd $TARDIR/ \
-    && export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH \
-    && ./configure --prefix=$GCC_INSTALL --enable-threads=posix \
-    --disable-checking --disable-multilib && make -j${nproc} && make install \
-    && cd -
+#ARG TARDIR=$PACKINST/gcc
+#ENV GCC_INSTALL=/usr/local/gcc
+#RUN mkdir -p $TARDIR
+#RUN wget -q https://ftp.gnu.org/gnu/gcc/gcc-10.2.0/gcc-10.2.0.tar.gz \
+#    -O gcc.tar.gz
+#RUN tar -zvxf gcc.tar.gz -C $TARDIR --strip-components 1 && cd $TARDIR/ \
+#    && export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH \
+#    && ./configure --prefix=$GCC_INSTALL --enable-threads=posix \
+#    --disable-checking --disable-multilib && make -j${nproc} && make install \
+#    && cd -
 
 # ARG TARDIR=/usr/local/go
 # ENV GO_INSTALL=$TARDIR

@@ -1,4 +1,8 @@
 import re
+import datetime
+
+def get_current_timestamp():
+    return str(datetime.datetime.now())
 
 class Logger(object):
         DEBUG, NOTE, WARNING, ERROR, CRITICAL = list(range(0,5))
@@ -40,7 +44,7 @@ class Logger(object):
             if self.colored and color is not None and levelname is not None:
                 level = "".join([self.BLD % color, levelname, self.RST])
                 msg = "".join([self.STD % color, msg, self.RST])
-                return "%s: %s" % (level, msg)
+                return "%s[%s]: %s" % (level, get_current_timestamp(), msg)
 
             return msg
 

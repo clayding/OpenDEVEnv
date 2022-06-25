@@ -4,24 +4,30 @@ import shutil
 import time
 import utils
 
+##############################################ADD NEW HERE##############################################################
+global_dfdict = {"devtool":'Dockerfiles/Dockerfile.devtool',        "kernel":'Dockerfiles/Dockerfile.kerneldev',
+                 "dependency":'Dockerfiles/Dockerfile.dependency',  "beauty":'Dockerfiles/Dockerfile.beauty',
+                 "base":'Dockerfiles/Dockerfile.base',              "lede":'Dockerfiles/Dockerfile.lede'
+                }
+########################################################################################################################
+
 class Assembler(object):
-    def __init__(self, dockfiles_path, http_proxy):
-        self.devtool = 'Dockerfiles/Dockerfile.devtool'
-        self.kerneld = 'Dockerfiles/Dockerfile.kerneldev'
-        self.dependf = 'Dockerfiles/Dockerfile.dependency'
-        self.mbeauty = 'Dockerfiles/Dockerfile.beauty'
+    def __init__(self, dockfiles_path, http_proxy, checkfilelist):
         self.current = dockfiles_path
-        self.dt_path = utils.os_concat_path(self.current, self.devtool)
-        self.kd_path = utils.os_concat_path(self.current, self.kerneld)
-        self.dp_path = utils.os_concat_path(self.current, self.dependf)
-        self.be_path = utils.os_concat_path(self.current, self.mbeauty)
+        self.filelist = checkfilelist
         self.dockerf = utils.os_concat_path(self.current, 'Dockerfile')
         self.tempdir = utils.os_concat_path(self.current, 'Dockerfiles/temp')
-        self.readbuf = ''
-        self.writbuf = ''
         self.signatu = 'clayding <gdskclay@gmail.com>'
         self.proxycf = http_proxy
 
+    def find_dockerfile_path(self, key):
+        for k, v in global_dfdict.items():
+            if k == key:
+                file_path = utils.os_concat_path(self.current, v)
+                self.filelist.append(file_path)
+                return file_path
+        print('Not found the pair to key:{}' .format(key))
+        return ""
 
     def read(self, file):
         buffer=''
@@ -35,17 +41,30 @@ class Assembler(object):
             f.write(buffer)
         f.close()
 
-    def assemble(self, dst, new):
-        devbuff = self.read(self.dt_path)
-        mbebuff = self.read(self.be_path)
-        dstbuff = self.read(dst)
+    def _assmble_render(self, dst, render_dict):
+        '''Remove NULL value'''
+        for key in list(render_dict.keys()):
+            if not render_dict[key]:
+                render_dict.pop(key)
 
-        distinfo = utils.platform_dist()
-        if not distinfo:
-            return
-        disinfo_hdr=distinfo[0].lower()
-        base_ver = disinfo_hdr + ':' + str(self.get_dist_version(disinfo_hdr))
-        base_dep = self.get_dist_dependency(disinfo_hdr)
+        template= Template(dst)
+        content = template.render(render_dict)
+
+        return content
+
+    def assemble_base(self):
+        devbuff = self.read(self.find_dockerfile_path("devtool")) # devtool path
+        mbebuff = self.read(self.find_dockerfile_path("beauty")) # beauty path
+        dstbuff = self.read(self.find_dockerfile_path("base")) # base path
+
+        base_ver = str(self.get_dist_dependency("", "distribution")) + \
+                ':' + str(self.get_dist_dependency("", "version"))
+        src_list = str(self.get_dist_dependency("", "sourcelist"))
+        if src_list:
+            base_dep = src_list + " && \ \n"
+        else:
+            base_dep = str()
+        base_dep += self.get_dist_dependency("", "dependency")
 
         render_dict = dict(DOCKERFILE_DEVTOOL=devbuff,
                            DOCKERFILE_BEAUTY=mbebuff,
@@ -53,17 +72,32 @@ class Assembler(object):
                            DOCKERFILE_HTTP_PROXY=self.proxycf,
                            DOCKERFILE_DEPENDENCIES=base_dep,
                            DOCKERFILE_MAINTAINER=self.signatu)
-        '''Remove NULL value'''
-        for key in list(render_dict.keys()):
-            if not render_dict[key]:
-                render_dict.pop(key)
 
-        template= Template(dstbuff)
-        content = template.render(render_dict)
-        #print(content)
+        return  self._assmble_render(dstbuff, render_dict)
+
+    def assemble(self, desc, new):
+        basebuffer = self.assemble_base()
+        destbuffer = self.read(self.find_dockerfile_path(desc))
+
+        if desc != "base":
+            render_dict = dict(DOCKERFILE_BASE=basebuffer)
+##############################################ADD NEW HERE##############################################################
+            # For kernel development
+            if desc == "kernel":
+                kernel_dep = self.get_dist_dependency("", "kernel_depend")
+                render_dict['DOCKERFILE_KERNEL_DEP'] = kernel_dep
+            # For lede development
+            if desc == "lede":
+                lede_dep = self.get_dist_dependency("", "lede_depend")
+                render_dict['DOCKERFILE_LEDE_DEP'] = lede_dep
+########################################################################################################################
+
+            content = self._assmble_render(destbuffer, render_dict)
+        else:
+            content = basebuffer
 
         self.write(new, content)
-    
+
     def check_dir(self, path):
         dirname = utils.os_get_abs_dirname(path)
         dirname = dirname.strip().rstrip('/')
@@ -96,12 +130,16 @@ class Assembler(object):
             shutil.rmtree(dirname)
             print('Deleted temporary folder:{}' .format(dirname))
 
-    def generate_kernel(self):
+    def _generate_dockerfile(self, desc):
         newfile =  self.tempdir + '/Dockerfile.' + str(int(time.time()))
         newpath = utils.os_concat_path(self.current, newfile)
         self.check_dir(newpath)
-        self.assemble(self.kd_path, newpath)
+        self.assemble(desc, newpath)
         self.create_link(newpath)
+
+    def generate(self, desc):
+        self._generate_dockerfile(desc)
+
 
     def read_yaml(self, filename):
         with open(filename, 'r') as f:
@@ -110,26 +148,27 @@ class Assembler(object):
         vars = safe_load(buffer)
         return vars
 
-    def get_dist_version(self, dist):
-        yamlvars = self.read_yaml(self.dp_path)
-        distinfo = yamlvars[dist]
+    def get_dist_dependency(self, dist, key):
+        disinfo_hdr = dist
+        if not dist:
+            distinfo = utils.platform_dist()
+            if not distinfo:
+                return
+            disinfo_hdr=distinfo[0].lower()
+
+        if key == "distribution":
+            return disinfo_hdr
+
+        yamlvars = self.read_yaml(self.find_dockerfile_path("dependency"))
+        distinfo = yamlvars[disinfo_hdr]
         if distinfo:
-            return distinfo['version']
+            return distinfo[key]
         else:
-            print("Not support {}" .format(dist))
-            return None
-    
-    def get_dist_dependency(self, dist):
-        yamlvars = self.read_yaml(self.dp_path)
-        distinfo = yamlvars[dist]
-        if distinfo:
-            return distinfo['dependency']
-        else:
-            print("Not support {}" .format(dist))
+            print("Not support {} key {}" .format(dist, key))
             return None
 
     def list_dist(self):
-        yamlvars = self.read_yaml(self.dp_path)
+        yamlvars = self.read_yaml(self.find_dockerfile_path("dependency"))
         print('List suported distributions: ', end = '')
         for key in yamlvars:
             print('{} ' .format(key), end = '')
