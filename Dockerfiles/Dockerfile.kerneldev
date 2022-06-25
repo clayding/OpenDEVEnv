@@ -11,6 +11,8 @@ ENV https_proxy {{ DOCKERFILE_HTTP_PROXY }}
 {% endif %}
 RUN {{ DOCKERFILE_DEPENDENCIES }}
 
+{{ DOCKERFILE_BEAUTY }}
+
 {{ DOCKERFILE_DEVTOOL }}
 
 FROM docker4dev_base as docker4kernel
@@ -21,7 +23,7 @@ ENV CODDIR=/opt/codes
 ENV SHADIR=/opt/shared
 
 ARG SUBDIR=kerneldev/
-ARG FROMDIR=./LOCAL
+ARG FROMDIR=./Local
 COPY $FROMDIR/scripts/$SUBDIR  $SCRDIR
 COPY $FROMDIR/packages/$SUBDIR $PACDIR
 COPY $FROMDIR/codes/$SUBDIR    $CODDIR

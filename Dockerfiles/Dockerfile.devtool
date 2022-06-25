@@ -2,7 +2,7 @@
 ARG PACKAGES=/opt/devtools/
 ARG PACKINST=/opt/packages_install/
 WORKDIR $PACKAGES
-COPY packages/devtools ./
+COPY ./Local/packages/devtools ./
 
 ARG TARDIR=$PACKINST/gdb
 RUN mkdir -p $TARDIR

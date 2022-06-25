@@ -9,10 +9,12 @@ class Assembler(object):
         self.devtool = 'Dockerfiles/Dockerfile.devtool'
         self.kerneld = 'Dockerfiles/Dockerfile.kerneldev'
         self.dependf = 'Dockerfiles/Dockerfile.dependency'
+        self.mbeauty = 'Dockerfiles/Dockerfile.beauty'
         self.current = dockfiles_path
         self.dt_path = utils.os_concat_path(self.current, self.devtool)
         self.kd_path = utils.os_concat_path(self.current, self.kerneld)
         self.dp_path = utils.os_concat_path(self.current, self.dependf)
+        self.be_path = utils.os_concat_path(self.current, self.mbeauty)
         self.dockerf = utils.os_concat_path(self.current, 'Dockerfile')
         self.tempdir = utils.os_concat_path(self.current, 'Dockerfiles/temp')
         self.readbuf = ''
@@ -33,8 +35,9 @@ class Assembler(object):
             f.write(buffer)
         f.close()
 
-    def assemble(self, src, dst, new):
-        srcbuff = self.read(src)
+    def assemble(self, dst, new):
+        devbuff = self.read(self.dt_path)
+        mbebuff = self.read(self.be_path)
         dstbuff = self.read(dst)
 
         distinfo = utils.platform_dist()
@@ -44,7 +47,8 @@ class Assembler(object):
         base_ver = disinfo_hdr + ':' + str(self.get_dist_version(disinfo_hdr))
         base_dep = self.get_dist_dependency(disinfo_hdr)
 
-        render_dict = dict(DOCKERFILE_DEVTOOL=srcbuff,
+        render_dict = dict(DOCKERFILE_DEVTOOL=devbuff,
+                           DOCKERFILE_BEAUTY=mbebuff,
                            DOCKERFILE_OS_VERSION=base_ver,
                            DOCKERFILE_HTTP_PROXY=self.proxycf,
                            DOCKERFILE_DEPENDENCIES=base_dep,
@@ -96,7 +100,7 @@ class Assembler(object):
         newfile =  self.tempdir + '/Dockerfile.' + str(int(time.time()))
         newpath = utils.os_concat_path(self.current, newfile)
         self.check_dir(newpath)
-        self.assemble(self.dt_path, self.kd_path, newpath)
+        self.assemble(self.kd_path, newpath)
         self.create_link(newpath)
 
     def read_yaml(self, filename):

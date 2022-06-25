@@ -31,11 +31,11 @@ def sys_get_allargs():
     return sys.argv
 
 def platform_dist():
-    pversion=platform.python_version()
+    pversion=platform.python_version().split('.')
     ''' 3.8.1 '''
     if pversion[0] == '3':
         '''python version < 3.8'''
-        if int(pversion[2]) < 8:
+        if int(pversion[1]) < 8:
             return platform.dist()
         else:
             return distro.linux_distribution()
