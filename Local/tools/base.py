@@ -25,10 +25,6 @@ class BaseConfig(object):
         self.buildstag = self.option.stage
         self.distclean = self.option.distclean
         self.gendocker = self.option.generate
-        self.httpproxy = self.option.proxy
-        self.kernelblt = self.option.kernel
-        self.ledebuilt = self.option.lede
-        self.devbaseim = self.option.devbase
         self.imagename = self.option.tag
         self.imageorig = self.option.tag
         if self.buildstag:
@@ -44,22 +40,13 @@ class BaseConfig(object):
         self.apcommand = self.option.command
     
     def _generate_dockerfile(self):
-        self.assemb = assembler.Assembler(self.buildpath, self.httpproxy, self.checkfilelist)
-##############################################ADD NEW HERE##############################################################
-        description = ""
-        if self.kernelblt:
-            desc = "kernel"
-        elif self.ledebuilt:
-            desc = "lede"
-        elif self.devbaseim:
-            desc = "base"
-#######################################################################################################################
+        self.assemb = assembler.Assembler(self.buildpath, self.checkfilelist, self.option)
+        result = self.assemb.generate()
 
-        if not desc:
+        if not result:
             self.logger.warn("No new Dockerfiles generated")
         else:
-            self.assemb.generate(desc)
-            self.logger.debug("%s Dockerfile generated" %desc)
+            self.logger.debug("%s Dockerfile generated" %result)
 
     def _is_file_newer(self, file, timestamp):
         """

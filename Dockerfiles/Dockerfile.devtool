@@ -81,6 +81,7 @@ RUN tar -xvzf cmake.tar.gz -C $TARDIR --strip-components 1
 # ARG TARDIR=$PACKINST/gcc
 # ENV GCC_INSTALL=/usr/local/gcc-8.5.0
 # RUN mkdir -p $TARDIR
+# RUN wget -c https://mirrors.tuna.tsinghua.edu.cn/gnu/gcc/gcc-8.5.0/gcc-8.5.0.tar.gz
 # RUN tar -zvxf gcc-8.5.0.tar.gz -C $TARDIR --strip-components 1 && cd $TARDIR/ \
 #     && ./configure --prefix=$GCC_INSTALL --enable-threads=posix \
 #     --disable-checking --disable-multilib && make -j${nproc} && make install
@@ -106,6 +107,8 @@ RUN tar -xvzf cmake.tar.gz -C $TARDIR --strip-components 1
 #RUN mkdir -p $TARDIR
 #RUN wget -q https://ftp.gnu.org/gnu/gcc/gcc-10.2.0/gcc-10.2.0.tar.gz \
 #    -O gcc.tar.gz
+#RUN wget -q https://mirrors.aliyun.com/gnu/gcc/gcc-10.2.0/gcc-10.2.0.tar.gz \
+#     -O gcc.tar.gz
 #RUN tar -zvxf gcc.tar.gz -C $TARDIR --strip-components 1 && cd $TARDIR/ \
 #    && export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH \
 #    && ./configure --prefix=$GCC_INSTALL --enable-threads=posix \

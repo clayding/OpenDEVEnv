@@ -12,13 +12,18 @@ global_dfdict = {"devtool":'Dockerfiles/Dockerfile.devtool',        "kernel":'Do
 ########################################################################################################################
 
 class Assembler(object):
-    def __init__(self, dockfiles_path, http_proxy, checkfilelist):
+    def __init__(self, dockfiles_path, checkfilelist, options):
         self.current = dockfiles_path
         self.filelist = checkfilelist
         self.dockerf = utils.os_concat_path(self.current, 'Dockerfile')
         self.tempdir = utils.os_concat_path(self.current, 'Dockerfiles/temp')
         self.signatu = 'clayding <gdskclay@gmail.com>'
-        self.proxycf = http_proxy
+
+        # Parse options
+        self.proxycf   = options.proxy
+        self.kernelblt = options.kernel
+        self.ledebuilt = options.lede
+        self.devbaseim = options.devbase
 
     def find_dockerfile_path(self, key):
         for k, v in global_dfdict.items():
@@ -57,14 +62,14 @@ class Assembler(object):
         mbebuff = self.read(self.find_dockerfile_path("beauty")) # beauty path
         dstbuff = self.read(self.find_dockerfile_path("base")) # base path
 
-        base_ver = str(self.get_dist_dependency("", "distribution")) + \
-                ':' + str(self.get_dist_dependency("", "version"))
-        src_list = str(self.get_dist_dependency("", "sourcelist"))
+        base_ver = str(self._get_dist_dependency("", "distribution")) + \
+                ':' + str(self._get_dist_dependency("", "version"))
+        src_list = str(self._get_dist_dependency("", "sourcelist"))
         if src_list:
             base_dep = src_list + " && \ \n"
         else:
             base_dep = str()
-        base_dep += self.get_dist_dependency("", "dependency")
+        base_dep += self._get_dist_dependency("", "dependency")
 
         render_dict = dict(DOCKERFILE_DEVTOOL=devbuff,
                            DOCKERFILE_BEAUTY=mbebuff,
@@ -84,11 +89,11 @@ class Assembler(object):
 ##############################################ADD NEW HERE##############################################################
             # For kernel development
             if desc == "kernel":
-                kernel_dep = self.get_dist_dependency("", "kernel_depend")
+                kernel_dep = self._get_dist_dependency("", "kernel_depend")
                 render_dict['DOCKERFILE_KERNEL_DEP'] = kernel_dep
             # For lede development
             if desc == "lede":
-                lede_dep = self.get_dist_dependency("", "lede_depend")
+                lede_dep = self._get_dist_dependency("", "lede_depend")
                 render_dict['DOCKERFILE_LEDE_DEP'] = lede_dep
 ########################################################################################################################
 
@@ -137,9 +142,21 @@ class Assembler(object):
         self.assemble(desc, newpath)
         self.create_link(newpath)
 
-    def generate(self, desc):
-        self._generate_dockerfile(desc)
+    def generate(self):
+##############################################ADD NEW HERE##############################################################
+        desc= ""
+        if self.kernelblt:
+            desc = "kernel"
+        elif self.ledebuilt:
+            desc = "lede"
+        elif self.devbaseim:
+            desc = "base"
+#######################################################################################################################
+        if desc:
+            self._generate_dockerfile(desc)
+            return desc
 
+        return ""
 
     def read_yaml(self, filename):
         with open(filename, 'r') as f:
@@ -148,7 +165,7 @@ class Assembler(object):
         vars = safe_load(buffer)
         return vars
 
-    def get_dist_dependency(self, dist, key):
+    def _get_dist_dependency(self, dist, key):
         disinfo_hdr = dist
         if not dist:
             distinfo = utils.platform_dist()
