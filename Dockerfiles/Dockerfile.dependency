@@ -13,7 +13,7 @@ ubuntu:
         apt-get install -y neovim
 
     kernel_depend: apt-get install -y libtool libtool-bin bc qemu-system-arm qemu
-        libssl-dev libgmp-dev libmpc-dev
+        libssl-dev libgmp-dev libmpc-dev kmod
 
     lede_depend: apt update -y && apt full-upgrade -y &&
         apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential
