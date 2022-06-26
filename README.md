@@ -39,9 +39,19 @@
    ```
 4. Build kernel images
    ```
-   $ ./setup -k -b ./
+   $ ./setup -k -t docker4dev_kernel -v 0 -b ./
     Create new symbol link to:././Dockerfiles/temp/Dockerfile.1638695133
     ERROR: subprocess.CalledProcessError, ignorable!!
     NOTE: Building docker builder image... (This may take some time.)
+
+   $ ./setup -k -t docker4dev_kernel -m /home/clay/workspace/ -b ./
    ```
-5. TODO
+5. Build lede images
+   ```
+   $ ./setup -l -t docker4dev_lede -v 0 -b ./
+    Create new symbol link to:././Dockerfiles/temp/Dockerfile.1638695133
+    ERROR: subprocess.CalledProcessError, ignorable!!
+    NOTE: Building docker builder image... (This may take some time.)
+
+   $ ./setup - -t docker4dev_lede -m /home/clay/workspace/ -b ./
+   ```
